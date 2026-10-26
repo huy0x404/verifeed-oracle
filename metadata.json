@@ -1,0 +1,6 @@
+{
+  "name": "VeriFeed - Conflict-Resolving Oracle",
+  "description": "Decentralized intelligent oracle powered by GenLayer that resolves conflicting web sources through validator LLM consensus and equivalence checking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
