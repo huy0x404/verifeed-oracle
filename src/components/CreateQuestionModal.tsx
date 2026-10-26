@@ -11,6 +11,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { OutputFormat, Question, SourceItem } from '../types';
+import { executeLiveGenLayerConsensus } from '../services/genlayer';
 
 interface CreateQuestionModalProps {
   isOpen: boolean;
@@ -145,93 +146,60 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
 
     setIsResolving(true);
 
-    // Step 1: Broadcasting TX
-    setResolutionStep('Broadcasting transaction to GenLayer Bradbury testnet...');
-    await new Promise((r) => setTimeout(r, 800));
-
-    // Step 2: Non-deterministic web fetching
-    setResolutionStep('Validators executing gl.get_webpage() across all submitted sources...');
-    await new Promise((r) => setTimeout(r, 1000));
-
-    // Step 3: Multi-LLM prompt reasoning
-    setResolutionStep(`Executing gl.exec_prompt() on ${validatorCount} validator nodes (Llama-3.3, DeepSeek, Mistral)...`);
-    await new Promise((r) => setTimeout(r, 1200));
-
-    // Step 4: Equivalence Principle
-    setResolutionStep('Testing semantic consensus via gl.eq_principle_prompt_llm()...');
-    await new Promise((r) => setTimeout(r, 900));
-
-    // Build the resolved item
-    const formattedSources: SourceItem[] = sources.map((s, idx) => {
-      let domain = 'web-source.com';
-      try {
-        domain = new URL(s.url).hostname;
-      } catch {
-        domain = 'source.org';
-      }
-
-      // Check if low reliability or conflict
-      const isConflicted = s.reliability === 'Low' || s.title.toLowerCase().includes('conflicting') || s.title.toLowerCase().includes('skeptic') || s.title.toLowerCase().includes('rumor');
-
-      return {
+    try {
+      const sourceItems: SourceItem[] = sources.map((s, idx) => ({
         id: `src-${Date.now()}-${idx}`,
         url: s.url,
-        title: s.title || `Source from ${domain}`,
-        domain,
+        title: s.title || `Source ${idx + 1}`,
+        domain: '',
         claimedAnswer: s.claimedAnswer || 'Observation noted',
         reliability: s.reliability,
-        status: isConflicted ? 'conflicted' : 'agreed',
-        snippet: isConflicted
-          ? 'Contradictory perspective evaluated and rejected during multi-validator cross-examination.'
-          : 'Official verified source aligned with consensus ground truth.',
+        status: 'unverified',
         publishedDate: 'Recent',
+      }));
+
+      const resolution = await executeLiveGenLayerConsensus(
+        title.trim(),
+        sourceItems,
+        outputFormat,
+        validatorCount,
+        (stageText) => setResolutionStep(stageText)
+      );
+
+      const newQuestion: Question = {
+        id: `vf-q-${Date.now().toString().slice(-4)}`,
+        title: title.trim(),
+        category,
+        primaryTag: 'Oracles / Data',
+        tags: ['Prediction Markets', 'AI Agents'],
+        outputFormat,
+        createdAt: new Date().toISOString(),
+        creatorAddress: userAddress || '0x7F2aC90b14cE40EfA10E1a4F4f74d08F0a7e8b14',
+        transactionHash: resolution.txHash,
+        blockNumber: resolution.blockNumber,
+        status: 'FINALIZED',
+        verdict: resolution.verdict,
+        confidenceScore: resolution.confidenceScore,
+        rationale: resolution.rationale,
+        resolutionTimeMs: 3800,
+        sources: resolution.evaluatedSources,
+        validatorsConsensus: {
+          totalValidators: validatorCount,
+          agreedCount: validatorCount,
+          disagreedCount: 0,
+          equivalenceScore: 1.0,
+          validatorVotes: resolution.validatorVotes,
+        },
+        disputeHistory: [],
       };
-    });
 
-    // Derive verdict from primary sources
-    const primarySource = formattedSources.find((s) => s.status === 'agreed') || formattedSources[0];
-    const verdict = primarySource.claimedAnswer.replace(' (Confirmed)', '');
-
-    const newQuestion: Question = {
-      id: `vf-q-${Date.now().toString().slice(-4)}`,
-      title: title.trim(),
-      category,
-      primaryTag: 'Oracles / Data',
-      tags: ['Prediction Markets', 'AI Agents'],
-      outputFormat,
-      createdAt: new Date().toISOString(),
-      creatorAddress: userAddress || '0x7F2aC90b14cE40EfA10E1a4F4f74d08F0a7e8b14',
-      transactionHash: '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
-      blockNumber: Math.floor(160000 + Math.random() * 5000),
-      status: 'FINALIZED',
-      verdict,
-      confidenceScore: +(98.5 + Math.random() * 1.4).toFixed(1),
-      rationale: `GenLayer validators independently retrieved all ${formattedSources.length} sources using gl.get_webpage(). Conflicting claims from lower-authority domains were isolated and refuted against official reports, achieving 100% equivalence consensus.`,
-      resolutionTimeMs: 3900,
-      sources: formattedSources,
-      validatorsConsensus: {
-        totalValidators: validatorCount,
-        agreedCount: validatorCount,
-        disagreedCount: 0,
-        equivalenceScore: 1.0,
-        validatorVotes: Array.from({ length: validatorCount }, (_, i) => ({
-          validatorId: `val-0${i + 1}`,
-          name: i === 0 ? 'Atlas Validator Alpha' : i === 1 ? 'Hyperion Node 4' : i === 2 ? 'Beacon Node 09' : `Validator Node ${i + 1}`,
-          nodeAddress: '0x' + Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
-          model: i === 0 ? 'Llama-3.3-70B-Instruct' : i === 1 ? 'DeepSeek-V3' : 'Mistral-Large-2411',
-          vote: verdict,
-          confidence: +(98.8 + Math.random() * 1.1).toFixed(1),
-          reasoning: `Extracted facts confirm "${verdict}". Contradictory source lacked verifiable cryptographic corroboration.`,
-          timestamp: new Date().toISOString(),
-          isEquivalenceAccepted: true,
-        })),
-      },
-      disputeHistory: [],
-    };
-
-    setIsResolving(false);
-    onSubmit(newQuestion);
-    onClose();
+      onSubmit(newQuestion);
+      onClose();
+    } catch (err: any) {
+      console.error('Error during resolution:', err);
+    } finally {
+      setIsResolving(false);
+    }
   };
 
   return (

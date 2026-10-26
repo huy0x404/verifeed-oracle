@@ -24,6 +24,8 @@ export default function App() {
     address: '0x7F2aC90b14cE40EfA10E1a4F4f74d08F0a7e8b14',
     balance: '240.50 GEN',
     network: 'Bradbury Testnet',
+    chainId: 4221,
+    providerType: 'generated',
   });
 
   const handleCreateQuestion = (newQuestion: Question) => {

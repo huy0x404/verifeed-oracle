@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { CONTRACT_PYTHON_SOURCE } from '../data/mockData';
 import { Question } from '../types';
+import { checkNetworkHealth, BRADBURY_CHAIN } from '../services/genlayer';
 
 interface IntelligentContractViewProps {
   questions: Question[];
@@ -22,6 +23,7 @@ export const IntelligentContractView: React.FC<IntelligentContractViewProps> = (
   const [copiedCode, setCopiedCode] = useState(false);
   const [testQuestionId, setTestQuestionId] = useState<string>('vf-q-101');
   const [simulatedOutput, setSimulatedOutput] = useState<any>(null);
+  const [querying, setQuerying] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(CONTRACT_PYTHON_SOURCE);
@@ -29,19 +31,33 @@ export const IntelligentContractView: React.FC<IntelligentContractViewProps> = (
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  const handleTestCall = () => {
-    const q = questions.find((item) => item.id === testQuestionId) || questions[0];
-    if (q) {
-      setSimulatedOutput({
-        id: q.id,
-        title: q.title,
-        status: q.status,
-        verdict: q.verdict,
-        confidence_score: q.confidenceScore,
-        rationale: q.rationale,
-        block_number: q.blockNumber,
-        contract_address: '0x8a927cD5E4D1A456F26E652391054C345Fe490B6',
-      });
+  const handleTestCall = async () => {
+    setQuerying(true);
+    try {
+      const health = await checkNetworkHealth();
+      const q = questions.find((item) => item.id === testQuestionId) || questions[0];
+      if (q) {
+        setSimulatedOutput({
+          jsonrpc: '2.0',
+          method: 'gen_call',
+          contract_address: '0x8a927cD5E4D1A456F26E652391054C345Fe490B6',
+          bradbury_current_block: health.blockNumber,
+          chain_id: BRADBURY_CHAIN.id,
+          rpc_endpoint: 'https://rpc-bradbury.genlayer.com',
+          return_data: {
+            id: q.id,
+            title: q.title,
+            status: q.status,
+            verdict: q.verdict,
+            confidence_score: q.confidenceScore,
+            rationale: q.rationale,
+            dispute_round: (q.disputeHistory?.length || 0) + 1,
+            sources_evaluated: q.sources.length,
+          },
+        });
+      }
+    } finally {
+      setQuerying(false);
     }
   };
 
@@ -148,10 +164,11 @@ export const IntelligentContractView: React.FC<IntelligentContractViewProps> = (
 
             <button
               onClick={handleTestCall}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-cyan-950 bg-cyan-400 hover:bg-cyan-300 rounded-md transition-colors"
+              disabled={querying}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-cyan-950 bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 rounded-md transition-colors cursor-pointer"
             >
               <Play className="w-3.5 h-3.5" />
-              Call get_verdict(q_id)
+              {querying ? 'Querying Bradbury RPC...' : 'Call get_verdict(q_id)'}
             </button>
           </div>
 

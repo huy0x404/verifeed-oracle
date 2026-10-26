@@ -70,4 +70,27 @@ export interface WalletState {
   address: string;
   balance: string;
   network: string;
+  chainId: number;
+  providerType: 'injected' | 'generated' | 'simulated';
+  privateKey?: string;
 }
+
+export interface NetworkHealth {
+  blockNumber: number;
+  rpcStatus: 'connected' | 'degraded' | 'disconnected';
+  latencyMs: number;
+  networkName: string;
+  chainId: number;
+}
+
+declare global {
+  interface Window {
+    ethereum?: {
+      isMetaMask?: boolean;
+      request: (args: { method: string; params?: any[] }) => Promise<any>;
+      on: (event: string, callback: (...args: any[]) => void) => void;
+      removeListener: (event: string, callback: (...args: any[]) => void) => void;
+    };
+  }
+}
+
