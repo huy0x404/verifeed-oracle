@@ -123,7 +123,7 @@ ${expectedOutcome}
 
 ## 07. Project Links & Evidence
 - **Website:** ${window.location.origin}
-- **GitHub Repository:** https://github.com/verifeed/verifeed-genlayer-oracle
+- **GitHub Repository:** https://github.com/huy0x404/verifeed-oracle
 - **Evidence Item 1:** Intelligent Contract (Python SDK) utilizing \`gl.get_webpage\`, \`gl.exec_prompt\`, and \`gl.eq_principle_prompt_llm\`
 - **Evidence Item 2:** Multi-Model Validator Consensus Engine with dispute resolution mechanism
 `;
@@ -145,7 +145,7 @@ ${expectedOutcome}
       contract_links: ['https://explorer-bradbury.genlayer.com/address/0x8a927cD5E4D1A456F26E652391054C345Fe490B6'],
       project_links: {
         website: window.location.origin,
-        github: 'https://github.com/verifeed/verifeed-genlayer-oracle',
+        github: 'https://github.com/huy0x404/verifeed-oracle',
       },
       evidence: [
         'GenLayer Python Intelligent Contract VeriFeedOracle.py with non-deterministic web fetching and LLM equivalence consensus',
@@ -453,12 +453,12 @@ ${expectedOutcome}
             <div className="p-4 bg-slate-950/80 border border-slate-800 rounded-xl space-y-1">
               <div className="text-slate-400">GitHub Repository (Evidence):</div>
               <a
-                href="https://github.com/verifeed/verifeed-genlayer-oracle"
+                href="https://github.com/huy0x404/verifeed-oracle"
                 target="_blank"
                 rel="noreferrer"
                 className="text-cyan-400 hover:underline flex items-center gap-1"
               >
-                https://github.com/verifeed/verifeed-genlayer-oracle
+                https://github.com/huy0x404/verifeed-oracle
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
