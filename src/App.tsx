@@ -26,6 +26,7 @@ export default function App() {
     network: 'Bradbury Testnet',
     chainId: 4221,
     providerType: 'generated',
+    activeNetwork: 'testnetBradbury',
   });
 
   const handleCreateQuestion = (newQuestion: Question) => {
@@ -143,6 +144,7 @@ export default function App() {
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateQuestion}
         userAddress={wallet.address}
+        activeNetwork={wallet.activeNetwork}
       />
 
       <QuestionDetailModal

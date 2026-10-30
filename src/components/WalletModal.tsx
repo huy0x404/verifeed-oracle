@@ -14,7 +14,7 @@ import {
   AlertCircle,
   Activity,
 } from 'lucide-react';
-import { NetworkHealth, WalletState } from '../types';
+import { NetworkHealth, WalletState, GenLayerNetwork } from '../types';
 import {
   connectWeb3Wallet,
   getOrCreateLocalGenLayerAccount,
@@ -40,12 +40,13 @@ export const WalletModal: React.FC<WalletModalProps> = ({
   const [showPrivateKey, setShowPrivateKey] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
   const [networkHealth, setNetworkHealth] = useState<NetworkHealth | null>(null);
+  const [selectedNetwork, setSelectedNetwork] = useState<GenLayerNetwork>(wallet.activeNetwork || 'testnetBradbury');
 
   useEffect(() => {
     if (isOpen) {
-      checkNetworkHealth().then(setNetworkHealth).catch(console.error);
+      checkNetworkHealth(selectedNetwork).then(setNetworkHealth).catch(console.error);
     }
-  }, [isOpen]);
+  }, [isOpen, selectedNetwork]);
 
   if (!isOpen) return null;
 
@@ -53,14 +54,15 @@ export const WalletModal: React.FC<WalletModalProps> = ({
     setConnecting(true);
     setErrorMsg(null);
     try {
-      const { address, chainId, balance } = await connectWeb3Wallet();
+      const { address, chainId, balance } = await connectWeb3Wallet(selectedNetwork);
       setWallet({
         connected: true,
         address,
         balance,
-        network: 'Bradbury Testnet',
+        network: selectedNetwork === 'studionet' ? 'Studio Network' : 'Bradbury Testnet',
         chainId,
         providerType: 'injected',
+        activeNetwork: selectedNetwork,
       });
       onClose();
     } catch (err: any) {
@@ -76,11 +78,12 @@ export const WalletModal: React.FC<WalletModalProps> = ({
       setWallet({
         connected: true,
         address,
-        balance: '150.00 GEN',
-        network: 'Bradbury Testnet',
-        chainId: 4221,
+        balance: '150.0000 GEN',
+        network: selectedNetwork === 'studionet' ? 'Studio Network' : 'Bradbury Testnet',
+        chainId: selectedNetwork === 'studionet' ? 61999 : 4221,
         providerType: 'generated',
         privateKey,
+        activeNetwork: selectedNetwork,
       });
       onClose();
     } catch (err: any) {
@@ -93,9 +96,10 @@ export const WalletModal: React.FC<WalletModalProps> = ({
       connected: false,
       address: '',
       balance: '0 GEN',
-      network: 'Bradbury Testnet',
-      chainId: 4221,
+      network: selectedNetwork === 'studionet' ? 'Studio Network' : 'Bradbury Testnet',
+      chainId: selectedNetwork === 'studionet' ? 61999 : 4221,
       providerType: 'simulated',
+      activeNetwork: selectedNetwork,
     });
     onClose();
   };
@@ -137,17 +141,45 @@ export const WalletModal: React.FC<WalletModalProps> = ({
           </button>
         </div>
 
+        {/* Network Toggle Tabs */}
+        <div className="flex items-center gap-1.5 p-2 bg-slate-950 border-b border-slate-800 text-xs">
+          <button
+            onClick={() => setSelectedNetwork('testnetBradbury')}
+            className={`flex-1 py-1.5 px-3 rounded-lg text-center transition-colors font-medium ${
+              selectedNetwork === 'testnetBradbury'
+                ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                : 'text-slate-400 hover:text-white bg-slate-900/50'
+            }`}
+          >
+            Bradbury Testnet (ID 4221)
+          </button>
+          <button
+            onClick={() => setSelectedNetwork('studionet')}
+            className={`flex-1 py-1.5 px-3 rounded-lg text-center transition-colors font-medium ${
+              selectedNetwork === 'studionet'
+                ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                : 'text-slate-400 hover:text-white bg-slate-900/50'
+            }`}
+          >
+            Studio Network (ID 61999)
+          </button>
+        </div>
+
         {/* Live Network Health Indicator */}
         <div className="px-6 py-2.5 bg-slate-950/90 border-b border-slate-800/80 flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-slate-300">Bradbury Node</span>
+            <span className="text-slate-300">
+              {selectedNetwork === 'studionet' ? 'GenLayer Studio Node' : 'Bradbury Node'}
+            </span>
             <span className="text-slate-600">·</span>
-            <span className="text-cyan-400">Chain ID 4221</span>
+            <span className="text-cyan-400">
+              Gas: {networkHealth?.gasPriceGwei || '0.010'} Gwei
+            </span>
           </div>
           <div className="flex items-center gap-2 text-slate-400">
             <Activity className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Block #{networkHealth?.blockNumber || 172600}</span>
+            <span>Block #{networkHealth?.blockNumber || (selectedNetwork === 'studionet' ? 1793350000 : 196860)}</span>
             <span className="text-slate-600">·</span>
             <span className="text-emerald-400">{networkHealth?.latencyMs || 45}ms</span>
           </div>

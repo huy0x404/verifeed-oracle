@@ -65,6 +65,25 @@ export interface Question {
   disputeHistory?: DisputeRound[];
 }
 
+export type GenLayerNetwork = 'testnetBradbury' | 'studionet';
+
+export interface LiveDeploymentRecord {
+  txHash: string;
+  contractAddress: string;
+  deployedAt: string;
+  network: GenLayerNetwork;
+  networkName: string;
+  status: string;
+  resultName: string;
+  blockNumber: number;
+  gasUsed: string;
+  leaderAddress: string;
+  validatorVotes: Array<{
+    validator: string;
+    vote: string;
+  }>;
+}
+
 export interface WalletState {
   connected: boolean;
   address: string;
@@ -73,6 +92,7 @@ export interface WalletState {
   chainId: number;
   providerType: 'injected' | 'generated' | 'simulated';
   privateKey?: string;
+  activeNetwork: GenLayerNetwork;
 }
 
 export interface NetworkHealth {
@@ -81,6 +101,8 @@ export interface NetworkHealth {
   latencyMs: number;
   networkName: string;
   chainId: number;
+  gasPriceGwei: string;
+  activeNetwork: GenLayerNetwork;
 }
 
 declare global {
@@ -93,4 +115,5 @@ declare global {
     };
   }
 }
+
 

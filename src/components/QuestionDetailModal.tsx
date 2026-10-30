@@ -422,7 +422,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
               <div className="p-4 rounded-xl border border-slate-800 bg-slate-950/80 space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-800">
                   <span className="text-slate-400">GenLayer Network:</span>
-                  <span className="text-cyan-400 font-bold">Bradbury Testnet (Chain ID 42161)</span>
+                  <span className="text-cyan-400 font-bold">Bradbury Testnet (Chain ID 4221)</span>
                 </div>
                 <div className="flex items-center justify-between pb-2 border-b border-slate-800">
                   <span className="text-slate-400">Intelligent Contract Address:</span>

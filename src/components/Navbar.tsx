@@ -96,10 +96,25 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Zone 3: Primary Action buttons */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Live Network Badge */}
+            <button
+              onClick={onConnectWallet}
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono rounded-md bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700 transition-colors whitespace-nowrap cursor-pointer"
+              title="Click to switch GenLayer network"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>
+                {wallet.activeNetwork === 'studionet' ? 'Studionet' : 'Bradbury'}
+              </span>
+              <span className="text-slate-500 text-[10px]">
+                ({wallet.chainId || 4221})
+              </span>
+            </button>
+
             <button
               onClick={onOpenCreateModal}
-              className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-cyan-950 bg-cyan-400 hover:bg-cyan-300 rounded-md transition-colors whitespace-nowrap shadow-sm shadow-cyan-400/20"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-cyan-950 bg-cyan-400 hover:bg-cyan-300 rounded-md transition-colors whitespace-nowrap shadow-sm shadow-cyan-400/20"
             >
               <Sparkles className="w-3.5 h-3.5" />
               New Question

@@ -10,7 +10,7 @@ import {
   HelpCircle,
   Zap,
 } from 'lucide-react';
-import { OutputFormat, Question, SourceItem } from '../types';
+import { OutputFormat, Question, SourceItem, GenLayerNetwork } from '../types';
 import { executeLiveGenLayerConsensus } from '../services/genlayer';
 
 interface CreateQuestionModalProps {
@@ -18,6 +18,7 @@ interface CreateQuestionModalProps {
   onClose: () => void;
   onSubmit: (newQuestion: Question) => void;
   userAddress: string;
+  activeNetwork?: GenLayerNetwork;
 }
 
 export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
@@ -25,11 +26,13 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
   onClose,
   onSubmit,
   userAddress,
+  activeNetwork = 'testnetBradbury',
 }) => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<'Sports' | 'Prediction Markets' | 'Crypto & Web3' | 'Science & Tech' | 'World News'>('Sports');
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('text');
-  const [validatorCount, setValidatorCount] = useState<number>(3);
+  const [validatorCount, setValidatorCount] = useState<number>(5);
+  const [targetNetwork, setTargetNetwork] = useState<GenLayerNetwork>(activeNetwork);
   const [isResolving, setIsResolving] = useState(false);
   const [resolutionStep, setResolutionStep] = useState<string>('');
 
@@ -163,7 +166,8 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
         sourceItems,
         outputFormat,
         validatorCount,
-        (stageText) => setResolutionStep(stageText)
+        targetNetwork,
+        (stageText: string) => setResolutionStep(stageText)
       );
 
       const newQuestion: Question = {
@@ -299,9 +303,41 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
                 onChange={(e) => setValidatorCount(Number(e.target.value))}
                 className="w-full px-3 py-2 text-xs text-white bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:border-cyan-500 font-mono"
               >
-                <option value={3}>3 Nodes (Standard)</option>
-                <option value={5}>5 Nodes (High Security)</option>
+                <option value={5}>5 Nodes (Bradbury Default)</option>
+                <option value={3}>3 Nodes (Fast Consensus)</option>
               </select>
+            </div>
+          </div>
+
+          {/* Network Selection */}
+          <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between gap-3 text-xs">
+            <div>
+              <div className="font-semibold text-white">Target GenLayer Network</div>
+              <div className="text-[11px] text-slate-400">Where this consensus resolution transaction will be broadcast</div>
+            </div>
+            <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded-lg border border-slate-800">
+              <button
+                type="button"
+                onClick={() => setTargetNetwork('testnetBradbury')}
+                className={`px-2.5 py-1 text-xs rounded transition-colors ${
+                  targetNetwork === 'testnetBradbury'
+                    ? 'bg-cyan-500 text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Bradbury Testnet
+              </button>
+              <button
+                type="button"
+                onClick={() => setTargetNetwork('studionet')}
+                className={`px-2.5 py-1 text-xs rounded transition-colors ${
+                  targetNetwork === 'studionet'
+                    ? 'bg-cyan-500 text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Studio Network
+              </button>
             </div>
           </div>
 
